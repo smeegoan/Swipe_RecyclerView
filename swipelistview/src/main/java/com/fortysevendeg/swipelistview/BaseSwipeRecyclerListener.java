@@ -1,6 +1,6 @@
 package com.fortysevendeg.swipelistview;
 
-public class BaseSwipeListViewListener implements SwipeListViewListener {
+public class BaseSwipeRecyclerListener implements SwipeRecyclerListener {
     @Override
     public void onOpened(int position, boolean toRight) {
     }
@@ -39,7 +39,7 @@ public class BaseSwipeListViewListener implements SwipeListViewListener {
 
     @Override
     public int onChangeSwipeMode(int position) {
-        return SwipeListView.SWIPE_MODE_DEFAULT;
+        return SwipeRecyclerView.SWIPE_MODE_DEFAULT;
     }
 
     @Override

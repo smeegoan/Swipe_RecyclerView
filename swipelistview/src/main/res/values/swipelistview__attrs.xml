@@ -18,7 +18,7 @@
 
 <resources>
 
-    <declare-styleable name="SwipeListView">
+    <declare-styleable name="SwipeRecyclerView">
         <attr name="swipeOpenOnLongPress" format="boolean"/>
         <attr name="onlyOneOpenedWhenSwipe" format="boolean"/>
         <attr name="swipeAnimationTime" format="integer"/>

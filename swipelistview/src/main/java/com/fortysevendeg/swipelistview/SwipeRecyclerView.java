@@ -23,7 +23,6 @@ import android.content.res.TypedArray;
 import android.support.v4.view.MotionEventCompat;
 import android.support.v4.view.ViewConfigurationCompat;
 import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
@@ -36,7 +35,7 @@ import java.util.List;
 /**
  * ListView subclass that provides the swipe functionality
  */
-public class SwipeListView extends RecyclerView {
+public class SwipeRecyclerView extends EmptyRecyclerView {
     
     /**
      * log tag
@@ -133,12 +132,12 @@ public class SwipeListView extends RecyclerView {
     /**
      * Internal listener for common swipe events
      */
-    private SwipeListViewListener swipeListViewListener;
+    private SwipeRecyclerListener swipeRecyclerListener;
 
     /**
      * Internal touch listener
      */
-    private SwipeListViewTouchListener touchListener;
+    private SwipeRecyclerTouchListener touchListener;
 
 
     /**
@@ -148,7 +147,7 @@ public class SwipeListView extends RecyclerView {
      * @param swipeBackView  Back Identifier
      * @param swipeFrontView Front Identifier
      */
-    public SwipeListView(Context context, int swipeBackView, int swipeFrontView) {
+    public SwipeRecyclerView(Context context, int swipeBackView, int swipeFrontView) {
         super(context);
         this.swipeFrontView = swipeFrontView;
         this.swipeBackView = swipeBackView;
@@ -158,7 +157,7 @@ public class SwipeListView extends RecyclerView {
     /**
      * @see android.widget.ListView#ListView(android.content.Context, android.util.AttributeSet)
      */
-    public SwipeListView(Context context, AttributeSet attrs) {
+    public SwipeRecyclerView(Context context, AttributeSet attrs) {
         super(context, attrs);
         init(attrs);
     }
@@ -166,7 +165,7 @@ public class SwipeListView extends RecyclerView {
     /**
      * @see android.widget.ListView#ListView(android.content.Context, android.util.AttributeSet, int)
      */
-    public SwipeListView(Context context, AttributeSet attrs, int defStyle) {
+    public SwipeRecyclerView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
         init(attrs);
     }
@@ -192,20 +191,20 @@ public class SwipeListView extends RecyclerView {
         int swipeActionRight = SWIPE_ACTION_REVEAL;
 
         if (attrs != null) {
-            TypedArray styled = getContext().obtainStyledAttributes(attrs, R.styleable.SwipeListView);
-            swipeMode = styled.getInt(R.styleable.SwipeListView_swipeMode, SWIPE_MODE_BOTH);
-            swipeActionLeft = styled.getInt(R.styleable.SwipeListView_swipeActionLeft, SWIPE_ACTION_REVEAL);
-            swipeActionRight = styled.getInt(R.styleable.SwipeListView_swipeActionRight, SWIPE_ACTION_REVEAL);
-            onlyOneOpenedWhenSwipe = styled.getBoolean(R.styleable.SwipeListView_onlyOneOpenedWhenSwipe, false);
-            swipeOffsetLeft = styled.getDimension(R.styleable.SwipeListView_swipeOffsetLeft, 0);
-            swipeOffsetRight = styled.getDimension(R.styleable.SwipeListView_swipeOffsetRight, 0);
-            swipeOpenOnLongPress = styled.getBoolean(R.styleable.SwipeListView_swipeOpenOnLongPress, true);
-            swipeAnimationTime = styled.getInteger(R.styleable.SwipeListView_swipeAnimationTime, 0);
-            swipeCloseAllItemsWhenMoveList = styled.getBoolean(R.styleable.SwipeListView_swipeCloseAllItemsWhenMoveList, true);
-            swipeDrawableChecked = styled.getResourceId(R.styleable.SwipeListView_swipeDrawableChecked, 0);
-            swipeDrawableUnchecked = styled.getResourceId(R.styleable.SwipeListView_swipeDrawableUnchecked, 0);
-            swipeFrontView = styled.getResourceId(R.styleable.SwipeListView_swipeFrontView, 0);
-            swipeBackView = styled.getResourceId(R.styleable.SwipeListView_swipeBackView, 0);
+            TypedArray styled = getContext().obtainStyledAttributes(attrs, R.styleable.SwipeRecyclerView);
+            swipeMode = styled.getInt(R.styleable.SwipeRecyclerView_swipeMode, SWIPE_MODE_BOTH);
+            swipeActionLeft = styled.getInt(R.styleable.SwipeRecyclerView_swipeActionLeft, SWIPE_ACTION_REVEAL);
+            swipeActionRight = styled.getInt(R.styleable.SwipeRecyclerView_swipeActionRight, SWIPE_ACTION_REVEAL);
+            onlyOneOpenedWhenSwipe = styled.getBoolean(R.styleable.SwipeRecyclerView_onlyOneOpenedWhenSwipe, false);
+            swipeOffsetLeft = styled.getDimension(R.styleable.SwipeRecyclerView_swipeOffsetLeft, 0);
+            swipeOffsetRight = styled.getDimension(R.styleable.SwipeRecyclerView_swipeOffsetRight, 0);
+            swipeOpenOnLongPress = styled.getBoolean(R.styleable.SwipeRecyclerView_swipeOpenOnLongPress, true);
+            swipeAnimationTime = styled.getInteger(R.styleable.SwipeRecyclerView_swipeAnimationTime, 0);
+            swipeCloseAllItemsWhenMoveList = styled.getBoolean(R.styleable.SwipeRecyclerView_swipeCloseAllItemsWhenMoveList, true);
+            swipeDrawableChecked = styled.getResourceId(R.styleable.SwipeRecyclerView_swipeDrawableChecked, 0);
+            swipeDrawableUnchecked = styled.getResourceId(R.styleable.SwipeRecyclerView_swipeDrawableUnchecked, 0);
+            swipeFrontView = styled.getResourceId(R.styleable.SwipeRecyclerView_swipeFrontView, 0);
+            swipeBackView = styled.getResourceId(R.styleable.SwipeRecyclerView_swipeBackView, 0);
             styled.recycle();
         }
 
@@ -220,7 +219,7 @@ public class SwipeListView extends RecyclerView {
 
         final ViewConfiguration configuration = ViewConfiguration.get(getContext());
         touchSlop = ViewConfigurationCompat.getScaledPagingTouchSlop(configuration);
-        touchListener = new SwipeListViewTouchListener(this, swipeFrontView, swipeBackView);
+        touchListener = new SwipeRecyclerTouchListener(this, swipeFrontView, swipeBackView);
         if (swipeAnimationTime > 0) {
             touchListener.setAnimationTime(swipeAnimationTime);
         }
@@ -248,7 +247,7 @@ public class SwipeListView extends RecyclerView {
         touchListener.reloadChoiceStateInView(convertView.findViewById(swipeFrontView), position);
         touchListener.reloadSwipeStateInView(convertView.findViewById(swipeFrontView), position);
 
-        // Clean pressed state (if dismiss is fire from a cell, to this cell, with a press drawable, in a swipelistview
+        // Clean pressed state (if dismiss is fire from a cell, to this cell, with a press drawable, in a SwipeRecyclerView
         // when this cell will be recycle it will still have his pressed state. This ensure the pressed state is
         // cleaned.
         for(int j=0; j<((ViewGroup)convertView).getChildCount(); ++j) {
@@ -400,8 +399,8 @@ public class SwipeListView extends RecyclerView {
      * @param reverseSortedPositions All dismissed positions
      */
     protected void onDismiss(int[] reverseSortedPositions) {
-        if (swipeListViewListener != null) {
-            swipeListViewListener.onDismiss(reverseSortedPositions);
+        if (swipeRecyclerListener != null) {
+            swipeRecyclerListener.onDismiss(reverseSortedPositions);
         }
     }
 
@@ -413,8 +412,8 @@ public class SwipeListView extends RecyclerView {
      * @param right    to right
      */
     protected void onStartOpen(int position, int action, boolean right) {
-        if (swipeListViewListener != null && position != ListView.INVALID_POSITION) {
-            swipeListViewListener.onStartOpen(position, action, right);
+        if (swipeRecyclerListener != null && position != ListView.INVALID_POSITION) {
+            swipeRecyclerListener.onStartOpen(position, action, right);
         }
     }
 
@@ -425,8 +424,8 @@ public class SwipeListView extends RecyclerView {
      * @param right
      */
     protected void onStartClose(int position, boolean right) {
-        if (swipeListViewListener != null && position != ListView.INVALID_POSITION) {
-            swipeListViewListener.onStartClose(position, right);
+        if (swipeRecyclerListener != null && position != ListView.INVALID_POSITION) {
+            swipeRecyclerListener.onStartClose(position, right);
         }
     }
 
@@ -436,8 +435,8 @@ public class SwipeListView extends RecyclerView {
      * @param position item clicked
      */
     protected void onClickFrontView(int position) {
-        if (swipeListViewListener != null && position != ListView.INVALID_POSITION) {
-            swipeListViewListener.onClickFrontView(position);
+        if (swipeRecyclerListener != null && position != ListView.INVALID_POSITION) {
+            swipeRecyclerListener.onClickFrontView(position);
         }
     }
 
@@ -447,8 +446,8 @@ public class SwipeListView extends RecyclerView {
      * @param position back item clicked
      */
     protected void onClickBackView(int position) {
-        if (swipeListViewListener != null && position != ListView.INVALID_POSITION) {
-            swipeListViewListener.onClickBackView(position);
+        if (swipeRecyclerListener != null && position != ListView.INVALID_POSITION) {
+            swipeRecyclerListener.onClickBackView(position);
         }
     }
 
@@ -459,8 +458,8 @@ public class SwipeListView extends RecyclerView {
      * @param toRight  If should be opened toward the right
      */
     protected void onOpened(int position, boolean toRight) {
-        if (swipeListViewListener != null && position != ListView.INVALID_POSITION) {
-            swipeListViewListener.onOpened(position, toRight);
+        if (swipeRecyclerListener != null && position != ListView.INVALID_POSITION) {
+            swipeRecyclerListener.onOpened(position, toRight);
         }
     }
 
@@ -471,8 +470,8 @@ public class SwipeListView extends RecyclerView {
      * @param fromRight If open from right
      */
     protected void onClosed(int position, boolean fromRight) {
-        if (swipeListViewListener != null && position != ListView.INVALID_POSITION) {
-            swipeListViewListener.onClosed(position, fromRight);
+        if (swipeRecyclerListener != null && position != ListView.INVALID_POSITION) {
+            swipeRecyclerListener.onClosed(position, fromRight);
         }
     }
 
@@ -483,8 +482,8 @@ public class SwipeListView extends RecyclerView {
      * @param selected if item is selected or not
      */
     protected void onChoiceChanged(int position, boolean selected) {
-        if (swipeListViewListener != null && position != ListView.INVALID_POSITION) {
-            swipeListViewListener.onChoiceChanged(position, selected);
+        if (swipeRecyclerListener != null && position != ListView.INVALID_POSITION) {
+            swipeRecyclerListener.onChoiceChanged(position, selected);
         }
     }
 
@@ -492,8 +491,8 @@ public class SwipeListView extends RecyclerView {
      * User start choice items
      */
     protected void onChoiceStarted() {
-        if (swipeListViewListener != null) {
-            swipeListViewListener.onChoiceStarted();
+        if (swipeRecyclerListener != null) {
+            swipeRecyclerListener.onChoiceStarted();
         }
     }
 
@@ -501,8 +500,8 @@ public class SwipeListView extends RecyclerView {
      * User end choice items
      */
     protected void onChoiceEnded() {
-        if (swipeListViewListener != null) {
-            swipeListViewListener.onChoiceEnded();
+        if (swipeRecyclerListener != null) {
+            swipeRecyclerListener.onChoiceEnded();
         }
     }
 
@@ -510,8 +509,8 @@ public class SwipeListView extends RecyclerView {
      * User is in first item of list
      */
     protected void onFirstListItem() {
-        if (swipeListViewListener != null) {
-            swipeListViewListener.onFirstListItem();
+        if (swipeRecyclerListener != null) {
+            swipeRecyclerListener.onFirstListItem();
         }
     }
 
@@ -519,8 +518,8 @@ public class SwipeListView extends RecyclerView {
      * User is in last item of list
      */
     protected void onLastListItem() {
-        if (swipeListViewListener != null) {
-            swipeListViewListener.onLastListItem();
+        if (swipeRecyclerListener != null) {
+            swipeRecyclerListener.onLastListItem();
         }
     }
 
@@ -528,8 +527,8 @@ public class SwipeListView extends RecyclerView {
      * Notifies onListChanged
      */
     protected void onListChanged() {
-        if (swipeListViewListener != null) {
-            swipeListViewListener.onListChanged();
+        if (swipeRecyclerListener != null) {
+            swipeRecyclerListener.onListChanged();
         }
     }
 
@@ -540,14 +539,14 @@ public class SwipeListView extends RecyclerView {
      * @param x        Current position
      */
     protected void onMove(int position, float x) {
-        if (swipeListViewListener != null && position != ListView.INVALID_POSITION) {
-            swipeListViewListener.onMove(position, x);
+        if (swipeRecyclerListener != null && position != ListView.INVALID_POSITION) {
+            swipeRecyclerListener.onMove(position, x);
         }
     }
 
     protected int changeSwipeMode(int position) {
-        if (swipeListViewListener != null && position != ListView.INVALID_POSITION) {
-            return swipeListViewListener.onChangeSwipeMode(position);
+        if (swipeRecyclerListener != null && position != ListView.INVALID_POSITION) {
+            return swipeRecyclerListener.onChangeSwipeMode(position);
         }
         return SWIPE_MODE_DEFAULT;
     }
@@ -555,10 +554,10 @@ public class SwipeListView extends RecyclerView {
     /**
      * Sets the Listener
      *
-     * @param swipeListViewListener Listener
+     * @param swipeRecyclerListener Listener
      */
-    public void setSwipeListViewListener(SwipeListViewListener swipeListViewListener) {
-        this.swipeListViewListener = swipeListViewListener;
+    public void setSwipeRecyclerListener(SwipeRecyclerListener swipeRecyclerListener) {
+        this.swipeRecyclerListener = swipeRecyclerListener;
     }
 
     /**
